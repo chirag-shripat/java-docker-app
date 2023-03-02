@@ -5,7 +5,7 @@ pipeline {
 	stages {
 		stage("SCM") {
 			steps {
-				git 'https://github.com/wssrronak/java-docker-app.git'
+				git 'https://github.com/chirag-shripat/java-docker-app.git'
 				}
 			}
 
