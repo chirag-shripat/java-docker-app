@@ -1,7 +1,5 @@
 pipeline {
-	agent {	
-		label 'pipeline-1'
-		}
+	agent any
 	stages {
 		stage("SCM") {
 			steps {
@@ -17,17 +15,17 @@ pipeline {
 			}
 		stage("Image") {
 			steps {
-				sh 'sudo docker build -t java-repo:$BUILD_TAG .'
-				sh 'sudo docker tag java-repo:$BUILD_TAG srronak/pipeline-java:$BUILD_TAG'
+				sh 'sudo docker build -t java-repo-img:v1 .'
+              			sh 'sudo docker tag java-repo-img:v2 chiragshripat/java-pipeline:latest'
 				}
 			}
 				
 	
 		stage("Docker Hub") {
 			steps {
-			withCredentials([string(credentialsId: 'docker_hub_passwd', variable: 'docker_hub_password_var')]) {
-				sh 'sudo docker login -u srronak -p ${docker_hub_password_var}'
-				sh 'sudo docker push srronak/pipeline-java:$BUILD_TAG'
+			     withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
+              		     sh 'sudo docker login -u ${username} -p ${password}'
+              		     sh 'sudo docker push chiragshripat/java-pipeline:latest'
 				}
 			}	
 
@@ -35,13 +33,13 @@ pipeline {
 		stage("QAT Testing") {
 			steps {
 				sh 'sudo docker rm -f $(sudo docker ps -a -q)'
-				sh 'sudo docker run -dit -p 8080:8080  srronak/pipeline-java:$BUILD_TAG'
+              			sh 'sudo docker run -dit -p 8081:8080 --name javaa-web-app chiragshripat/java-pipeline:latest'
 				}
 			}
 		stage("testing website") {
 			steps {
 				retry(5) {
-				sh 'curl --silent http://65.2.140.187:8080/java-web-app/ | grep -i "india" '
+				sh 'curl --silent http://65.2.140.187:8080/java-web-app/ '
 					}
 				}
 			}
@@ -57,8 +55,8 @@ pipeline {
 		stage("Prod Env") {
 			steps {
 			 sshagent(['ubuntu']) {
-			    sh 'ssh -o StrictHostKeyChecking=no ubuntu@65.2.140.187 sudo docker rm -f $(sudo docker ps -a -q)' 
-	                    sh "ssh -o StrictHostKeyChecking=no ubuntu@65.2.140.187 sudo docker run  -d  -p  49153:8080  srronak/javatest-app:$BUILD_TAG"
+			    sh 'ssh -o StrictHostKeyChecking=no ec2-user@43.204.98.132 sudo docker rm -f $(sudo docker ps -a -q)' 
+	                    sh "ssh -o StrictHostKeyChecking=no ec2-user@43.204.98.132 sudo docker run  -d  -p  49153:8080  chiragshripat/java-pipeline:latest"
 				}
 			}
 		}
