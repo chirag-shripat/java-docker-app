@@ -3,23 +3,23 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
-    app: d2
-  name: d2
+    app: deploy1
+  name: deploy1
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: d2
+      app: deploy1
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: d2
+        app: deploy1
     spec:
       containers:
-      - image: nginx
-        name: nginx
+      - image: chiragshripat/java-pipeline:latest
+        name: java-app
 
 ---
 
@@ -28,13 +28,13 @@ kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: d2
-  name: d2
+    app: deploy1
+  name: deploy1
 spec:
   ports:
-  - port: 80
+  - port: 8080
     protocol: TCP
-    targetPort: 80
+    targetPort: 8080
   selector:
-    app: d2
+    app: deploy1
   type: NodePort
